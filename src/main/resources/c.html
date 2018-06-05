@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Oscilador Puntual Amortiguado</title>
+</head>
+<body>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="height: 800px; margin: auto; min-width: 510px; max-width: 800px"></div>
+
+exit=0.150000
+
+average = 1.905000
+sd=2.220502
+beverloo=63.866685
+
+<script>
+
+    Highcharts.chart('container', {
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: 'Energía cinética'
+        },
+
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                }
+            }
+        },
+        xAxis: {
+            title: {
+                enabled: true,
+                text: 'c',
+                style: {
+                    fontSize:'25px'
+                }
+            },
+            labels: {
+
+                style: {
+                    fontSize:'20px'
+                }
+            },
+            categories: [
+                0.000,0.080,0.160,0.240,0.320,0.400,0.480,0.560,0.640,0.720,0.800,0.880,0.960,1.040,1.120,1.200,1.280,1.360,1.440,1.520,1.600,1.680,1.760,1.840,1.920,2.000,2.080,2.160,2.240,2.320,2.400,2.480,2.560,2.640,2.720,2.800
+            ]
+        },
+        yAxis: {
+            type: 'logarithmic',
+            minorTickInterval: 0.1,
+            title: {
+                text: 'Error',
+                style: {
+                    fontSize:'25px'
+                }
+            },
+            labels: {
+                style: {
+                    fontSize:'20px'
+                }
+            }
+        },
+        series: [{
+            name: 'Energía Cinética',
+            data: [
+                5.440,4.905,4.407,3.945,3.519,3.126,2.766,2.439,2.143,1.877,1.640,1.431,1.249,1.093,0.963,0.856,0.773,0.712,0.671,0.650,0.649,0.664,0.697,0.745,0.808,0.884,0.972,1.071,1.180,1.298,1.422,1.553,1.688,1.826,1.964,2.101
+            ]
+        }],
+
+        responsive: {
+            rules: [{
+                condition: {
+                    maxWidth: 500
+                },
+                chartOptions: {
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    }
+                }
+            }]
+        }
+
+    });
+
+</script>
+</body>
+</html>

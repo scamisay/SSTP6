@@ -62,7 +62,7 @@ public class BeverlooAdapter {
        List<Double> npList = new ArrayList<>();
        for(int i=1 ; i <= samples ; i++){
            System.out.println("sample nro "+i);
-           room = new Silo(width, 2, exitOpeningSize, .25,0.25);
+           room = new Silo(width, 2, exitOpeningSize, .25,0.25,.8);
            granularSystem = new GranularSystem(dt, dt2, simulationTime, room, particleNumbers);
            granularSystem.updateStatisticalValues(times);
            granularSystem.simulate();

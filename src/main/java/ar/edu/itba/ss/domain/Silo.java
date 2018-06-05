@@ -27,12 +27,19 @@ public class Silo{
     private double kN = 1e3;//N/m.
     private double kT = 1e3;//N/m.
     private double gamma = 1e2;
+    private double A = 2000;
+    private double B = 0.08;
+    private double TAU = 0.5;//s
+
+    private double desireVelocityModule;
+    private Vector2D target;
+
 
     //Cota superior para M: L/(2 * rMax)/4 > M
     private static final int M =4;
 
     // L > W > D
-    public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding) {
+    public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding, double desireVelocityModule) {
         if(exitOpeningSize > width || width > height){
             throw new IllegalArgumentException("height > width > exitOpeningSize");
         }
@@ -43,7 +50,8 @@ public class Silo{
         this.bottomPadding = bottomPadding;
         particles = new ArrayList<>();
         insideSiloArea = new Area(0,bottomPadding+height,width,bottomPadding);
-
+        this.desireVelocityModule = desireVelocityModule;
+        target = new Vector2D(0, width/2);
     }
 
     public void fillSilo(int particlesToAdd) {
@@ -133,21 +141,21 @@ public class Silo{
         this.gamma = gamma;
     }
 
-    public void evolve(double dt) {
+    /*public void evolve(double dt) {
         CellIndexMethod cim = instantiateCIM(particles);
         cim.calculate();
         particles.forEach( p -> p.updatePosition(dt, this));
         particles.forEach(Particle::updateForce);
         particles.forEach( p -> p.calculateForce(kN, kT, this));
         particles.forEach( p -> p.updateVelocity(dt));
-    }
+    }*/
 
     public void evolveLeapFrog(double dt) {
         CellIndexMethod cim = instantiateCIM(particles);
         cim.calculate();
         particles.forEach( p -> p.updateVelocityLF(dt));
         particles.forEach( p -> p.updatePositionLF(dt, this));
-        particles.forEach( p -> p.calculateForceLF(kN, kT, this));
+        particles.forEach( p -> p.calculateForceLF(kN, kT, this,A,B,desireVelocityModule, TAU, target));
     }
 
     public boolean containsParticle(Particle particle) {

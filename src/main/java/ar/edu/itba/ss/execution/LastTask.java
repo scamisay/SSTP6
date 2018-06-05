@@ -83,7 +83,7 @@ public class LastTask {
     }
 
     private static double simulatedCaudal(Double d) {
-        Silo room = new Silo(WIDTH, 2, d, .25,0.25);
+        Silo room = new Silo(WIDTH, 2, d, .25,0.25,.8);
         GranularSystem granularSystem = new GranularSystem(dt, dt2, 1.4, room, particleNumbers);
         granularSystem.updateStatisticalValues(Arrays.asList( .9));
         granularSystem.simulate();

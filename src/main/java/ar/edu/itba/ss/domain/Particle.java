@@ -427,10 +427,10 @@ public class Particle {
     }
 
     public void updatePositionLF(double dt, Silo silo) {
-        if(silo.wentOutside(this)){
+       /* if(silo.wentOutside(this)){
             position = silo.chooseAvailablePositionInSilo(radius);
             initParticle();
-        }else{
+        }else{*/
             double lastXPosition = lastPosition.getX();
             double lastYPosition = lastPosition.getY();
 
@@ -467,10 +467,14 @@ public class Particle {
             }else {
                 lastPosition = position;
             }*/
-        }
+       /* }*/
     }
 
-    public void calculateForceLF(double kN, double kT, Silo silo) {
+    public void calculateForceLF(double kN, double kT, Silo silo, Double A, Double B,
+                                 Double desireVelocityModule, Double tau, Vector2D target) {
+        /**
+         * calculo las particulas que estan en colision
+         */
         List<Particle> collisionsWithParticles =
                 getNeighbours().stream()
                         .filter(p -> this.isOverlapped(p))
@@ -482,9 +486,38 @@ public class Particle {
             collisionsWithParticles.add(opositeParticle);
         }
 
+        /**
+         * calculo de fuerzas
+         */
+        Vector2D granularForce = calculateGranularForce(collisionsWithParticles, kN, kT);
+        Vector2D socialForce = calculateSocialForce(collisionsWithParticles, A, B);
+        Vector2D desireForce = calculateDesireForce(desireVelocityModule, tau, target);
+
+        /**
+         * sumo todas las fuerzas
+         */
+        force = force.add(granularForce).add(socialForce).add(desireForce);
+    }
+
+    private Vector2D calculateDesireForce(Double desireVelocityModule, Double tau, Vector2D target) {
+        Vector2D vd = new Vector2D(target.getX() - position.getX(), target.getY() - position.getY())
+                .normalize()
+                .scalarMultiply(desireVelocityModule);
+
+        return vd.add(velocity.scalarMultiply(-1))
+                .scalarMultiply(mass/tau);
+    }
+
+    private Vector2D calculateSocialForce(List<Particle> collisionsWithParticles, Double A, Double B) {
+        return collisionsWithParticles.stream()
+                .map( p -> getNormalVersor(p).scalarMultiply(A*Math.exp(-1*overlap(p)/B)))
+                .reduce( (v1,v2) -> v1.add(v2)).orElse(new Vector2D(0,0));
+    }
+
+    private Vector2D calculateGranularForce(List<Particle> collisionsWithParticles, double kN, double kT) {
         double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, kT);
         double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, kT);
-        force = new Vector2D(totalForceInX, totalForceInY);
+        return new Vector2D(totalForceInX, totalForceInY);
     }
 
     public boolean isOverlapped(Particle p) {

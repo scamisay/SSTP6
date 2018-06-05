@@ -16,14 +16,15 @@ public class Main {
     private static final double DT = 1e-5;
     private static final long DT2 = (long)2e2;
 
-    private static final int PARTICLE_NUMBER = 100;
+    private static final int PARTICLE_NUMBER = 1;
 
     public static void main(String[] args) {
 
         double topPadding = 0;
         double bottomPadding = 5;
-        double simulationTime = .2;
-        Silo room = new Silo(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding);
+        double simulationTime = .5;
+        double desireVelocityModule = 1;
+        Silo room = new Silo(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,desireVelocityModule);
         GranularSystem system = new GranularSystem(DT, DT2, simulationTime, room, PARTICLE_NUMBER);
         system.setPrintable();
         system.simulate();

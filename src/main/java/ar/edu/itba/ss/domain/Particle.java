@@ -194,14 +194,11 @@ public class Particle {
     }
 
     public double overlap(Particle other) {
-        double overlap = getRadius() + other.getRadius() - getPosition().distance(other.getPosition());
-        return overlap > 0 ? overlap : 0;
-        //return overlap;
+        return getPosition().distance(other.getPosition()) - (getRadius() + other.getRadius());
     }
 
     public double previusOverlap(Particle other) {
-        double overlap = getRadius() + other.getRadius() - getLastPosition().distance(other.getLastPosition());
-        return overlap > 0 ? overlap : 0;//todo: probar si se permiten valores negativos
+        return getLastPosition().distance(other.getLastPosition()) - (getRadius() + other.getRadius());
     }
 
     private double overlapDerivate(Particle p) {
@@ -280,11 +277,11 @@ public class Particle {
         //force = new Vector2D(0,0);
     }
 
-    public void calculateForce(double kN, double gamma, Silo silo, double dt) {
+    public void calculateForce(double kN, double kT, Silo silo) {
         //me quedo con los vecinos que colisionan conmigo
         List<Particle> collisionsWithParticles =
                 getNeighbours().stream()
-                .filter(p -> this.overlap(p)>0)
+                .filter(p -> this.isOverlapped(p))
                 .collect(toList());
 
         double overlapWithAWall = overlapWithAWall(silo);
@@ -293,8 +290,8 @@ public class Particle {
             collisionsWithParticles.add(opositeParticle);
         }
 
-        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma, dt);
-        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma, dt);
+        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, kT);
+        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, kT);
         force = new Vector2D(totalForceInX, totalForceInY);
 
         if(overlapWithAWall > 0){
@@ -327,10 +324,14 @@ public class Particle {
         return mirrored;
     }
 
-    private double calculateTotalForceInX(List<Particle> collisionsWithParticles, double kN, double gamma, double dt) {
+    private double calculateTotalForceInX(List<Particle> collisionsWithParticles, double kN, double kT) {
         return collisionsWithParticles.stream()
                 .mapToDouble(p ->
-                        getNormalForce(p,kN,gamma, dt)*getNormalVersor(p).getX()
+                        (
+                                getNormalForce(p,kN)*getNormalVersor(p).getX()
+                        +
+                                getTangentialForce(p,kT)*getTangentialVersor(p).getX()
+                        ) * G * overlap(p)
                 )
                 .sum();
     }
@@ -369,16 +370,31 @@ public class Particle {
         return ret>0?ret:0;
     }
 
-    private double calculateTotalForceInY(List<Particle> collisionsWithParticles, double kN, double gamma, double dt) {
+    private double calculateTotalForceInY(List<Particle> collisionsWithParticles, double kN, double kT) {
         return collisionsWithParticles.stream()
                 .mapToDouble(p ->
-                        this.getNormalForce(p,kN,gamma,dt)*this.getNormalVersor(p).getY()
+                        (
+                                getNormalForce(p,kN)*getNormalVersor(p).getY()
+                                        +
+                                        getTangentialForce(p,kT)*getTangentialVersor(p).getY()
+                        ) * G * overlap(p)
                 )
-                .sum() - getMass()*G;
+                .sum();
     }
 
-    private double getNormalForce(Particle p, double kN, double gamma, double dt) {
-        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
+    private double getNormalForce(Particle p, double kN) {
+        //return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
+        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)).getNorm();
+    }
+
+    private double getTangentialForce(Particle p, double kT) {
+        double tangentialVelocity = getTangentialVelocity(p);
+        return getTangentialVersor(p).scalarMultiply(tangentialVelocity*overlap(p)*kT).getNorm();
+    }
+
+    //TODO: chequear esto en clase: esta bien calculada la velocidad tangencial entre dos particulas???
+    private double getTangentialVelocity(Particle p) {
+        return getVelocity().add(p.getVelocity()).getNorm();
     }
 
     private Vector2D getNormalVersor(Particle p) {
@@ -387,13 +403,11 @@ public class Particle {
         return new Vector2D(e_n_x, e_n_y);
     }
 
+    private Vector2D getTangentialVersor(Particle p) {
+        Vector2D normal = getNormalVersor(p);
+        return new Vector2D(-1*normal.getY(), normal.getX());
+    }
 
-    /*private Vector2D getTangentVersor(Particle p) {
-        Vector2D normalVersor = getNormalVersor(p);
-        double x = -1*normalVersor.getY();
-        double y = normalVersor.getY();
-        return new Vector2D(x, y);
-    }*/
 
     public void resetNeighbours() {
         neighbours = new ArrayList<>();
@@ -456,10 +470,10 @@ public class Particle {
         }
     }
 
-    public void calculateForceLF(double kN, double gamma, Silo silo, double dt) {
+    public void calculateForceLF(double kN, double kT, Silo silo) {
         List<Particle> collisionsWithParticles =
                 getNeighbours().stream()
-                        .filter(p -> this.overlap(p)>0)
+                        .filter(p -> this.isOverlapped(p))
                         .collect(toList());
 
         double overlapWithAWall = overlapWithAWall(silo);
@@ -468,9 +482,13 @@ public class Particle {
             collisionsWithParticles.add(opositeParticle);
         }
 
-        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, gamma, dt);
-        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, gamma, dt);
+        double totalForceInX = calculateTotalForceInX(collisionsWithParticles, kN, kT);
+        double totalForceInY = calculateTotalForceInY(collisionsWithParticles, kN, kT);
         force = new Vector2D(totalForceInX, totalForceInY);
+    }
+
+    public boolean isOverlapped(Particle p) {
+        return overlap(p) < 0;
     }
 }
 

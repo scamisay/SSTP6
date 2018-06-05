@@ -25,6 +25,7 @@ public class Silo{
     private final double bottomPadding;
     private List<Particle> particles;
     private double kN = 1e3;//N/m.
+    private double kT = 1e3;//N/m.
     private double gamma = 1e2;
 
     //Cota superior para M: L/(2 * rMax)/4 > M
@@ -97,7 +98,7 @@ public class Silo{
 
     private boolean isThereRoomForParticle(Particle particle) {
         return particle.getNeighbours().stream()
-                .noneMatch( p ->  particle.overlap(p) > 0);
+                .noneMatch( p ->  particle.isOverlapped(p));
     }
 
     private void addParticle(Particle particle) {
@@ -137,7 +138,7 @@ public class Silo{
         cim.calculate();
         particles.forEach( p -> p.updatePosition(dt, this));
         particles.forEach(Particle::updateForce);
-        particles.forEach( p -> p.calculateForce(kN, gamma, this, dt));
+        particles.forEach( p -> p.calculateForce(kN, kT, this));
         particles.forEach( p -> p.updateVelocity(dt));
     }
 
@@ -146,7 +147,7 @@ public class Silo{
         cim.calculate();
         particles.forEach( p -> p.updateVelocityLF(dt));
         particles.forEach( p -> p.updatePositionLF(dt, this));
-        particles.forEach( p -> p.calculateForceLF(kN, gamma, this, dt));
+        particles.forEach( p -> p.calculateForceLF(kN, kT, this));
     }
 
     public boolean containsParticle(Particle particle) {

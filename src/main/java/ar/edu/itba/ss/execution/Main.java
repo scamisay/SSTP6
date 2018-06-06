@@ -14,33 +14,21 @@ public class Main {
 
     //tiempos de simulacion
     private static final double DT = 1e-5;
-    private static final long DT2 = (long)2e2;
+    private static final long DT2 = (long)1e3;
 
-    private static final int PARTICLE_NUMBER = 1;
+    private static final int PARTICLE_NUMBER = 15;
 
     public static void main(String[] args) {
 
         double topPadding = 0;
         double bottomPadding = 5;
-        double simulationTime = .5;
-        double desireVelocityModule = 1;
-        Silo room = new Silo(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,desireVelocityModule);
+        double simulationTime = 1;
+        double drivenVelocity = 3;
+        Silo room = new Silo(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,drivenVelocity);
         GranularSystem system = new GranularSystem(DT, DT2, simulationTime, room, PARTICLE_NUMBER);
         system.setPrintable();
         system.simulate();
         System.out.println(1);
     }
 
-    /*public static void main(String[] args) {
-        double width = 20;
-        double exitOpeningSize = width / 5;
-        Silo silo = new Silo(width, 20, exitOpeningSize, 0, 5);
-        double dt = 1e-5;
-        long dt2 = (long) 1e2;
-        int particleNumbers = 300;
-        GranularSystem system = new GranularSystem(dt, dt2, .2, silo, particleNumbers);
-        system.setPrintable();
-        system.simulate();
-
-    }*/
 }

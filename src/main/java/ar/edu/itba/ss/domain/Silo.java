@@ -9,9 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ar.edu.itba.ss.algorithm.ParticlesCreator.MASS;
-import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
-
 public class Silo{
 
     private static final int MAX_CREATION_TRIES = 1000;
@@ -31,7 +28,7 @@ public class Silo{
     private double B = 0.08;
     private double TAU = 0.5;//s
 
-    private double desireVelocityModule;
+    private double drivenVelocity;
     private Vector2D target;
 
 
@@ -39,7 +36,7 @@ public class Silo{
     private static final int M =4;
 
     // L > W > D
-    public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding, double desireVelocityModule) {
+    public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding, double drivenVelocity) {
         if(exitOpeningSize > width || width > height){
             throw new IllegalArgumentException("height > width > exitOpeningSize");
         }
@@ -50,8 +47,8 @@ public class Silo{
         this.bottomPadding = bottomPadding;
         particles = new ArrayList<>();
         insideSiloArea = new Area(0,bottomPadding+height,width,bottomPadding);
-        this.desireVelocityModule = desireVelocityModule;
-        target = new Vector2D(0, width/2);
+        this.drivenVelocity = drivenVelocity;
+        target = new Vector2D(width/2, 0);
     }
 
     public void fillSilo(int particlesToAdd) {
@@ -155,7 +152,7 @@ public class Silo{
         cim.calculate();
         particles.forEach( p -> p.updateVelocityLF(dt));
         particles.forEach( p -> p.updatePositionLF(dt, this));
-        particles.forEach( p -> p.calculateForceLF(kN, kT, this,A,B,desireVelocityModule, TAU, target));
+        particles.forEach( p -> p.calculateForceLF(kN, gamma, this,A,B, drivenVelocity, TAU, target, dt));
     }
 
     public boolean containsParticle(Particle particle) {

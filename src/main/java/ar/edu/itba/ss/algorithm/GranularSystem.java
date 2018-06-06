@@ -85,7 +85,6 @@ public class GranularSystem {
                     updateCaudal(t);
                 }*/
             }
-            //silo.evolve(dt);
             silo.evolveLeapFrog(dt);
 
         }

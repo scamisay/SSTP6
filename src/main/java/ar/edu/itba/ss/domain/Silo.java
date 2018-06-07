@@ -150,9 +150,10 @@ public class Silo{
     public void evolveLeapFrog(double dt) {
         CellIndexMethod cim = instantiateCIM(particles);
         cim.calculate();
-        particles.forEach( p -> p.updateVelocityLF(dt));
-        particles.forEach( p -> p.updatePositionLF(dt, this));
+        particles.forEach( p -> p.updatePositionLF(dt));
+        particles.forEach( p -> p.predictVelocity(dt));
         particles.forEach( p -> p.calculateForceLF(kN, gamma, this,A,B, drivenVelocity, TAU, target, dt));
+        particles.forEach( p -> p.updateVelocityLF(dt));
     }
 
     public boolean containsParticle(Particle particle) {

@@ -20,9 +20,12 @@ public class Particle {
     private Cell cell;
     private List<Particle> neighbours = new ArrayList<>();
     private Vector2D lastForce;
+    private Vector2D prevLastForce = new Vector2D(0,0);
     private Vector2D lastPosition;
+    private Vector2D predVelocity = new Vector2D(0,0);
     private static int idCounter=0;
     private int id;
+    private boolean first = true;
 
     public static final double G = 9.80665;// 9.80665 m/s2
 
@@ -279,13 +282,19 @@ public class Particle {
     }
 
     public void updateVelocityLF(double dt) {
-        velocity = velocity.add(force.scalarMultiply(dt/mass));
+        velocity = velocity.add(force.scalarMultiply(dt/(3.0*mass))).add(lastForce.scalarMultiply(5.0*dt/(6.0*mass))).
+                subtract(prevLastForce.scalarMultiply(dt/(6.0*mass)));
     }
 
-    public void updatePositionLF(double dt, Silo silo) {
-        position = position.add(velocity.scalarMultiply(dt));
+    public void predictVelocity(double dt) {
+        predVelocity = velocity.add(force.scalarMultiply((3.0/2) *dt /mass)).subtract(lastForce.scalarMultiply((1.0/2) *dt /mass));
+
     }
 
+    public void updatePositionLF(double dt) {
+        position = position.add(velocity.scalarMultiply(dt)).add(force.scalarMultiply((2.0/3)*FastMath.pow(dt,2)/mass ))
+        .subtract(lastForce.scalarMultiply((1.0/6)*FastMath.pow(dt,2)/mass));
+    }
 
     public void calculateForceLF(double kN, double gamma, Silo silo, Double A, Double B,
                                  Double drivenVelocity, Double tau, Vector2D target, double dt) {
@@ -293,6 +302,13 @@ public class Particle {
          * calculo las particulas que estan en colision
          */
         //System.out.println("BB: "+id+"|"+getNeighbours().size());
+        if (!first) {
+            prevLastForce=lastForce;
+        }
+        else {
+            first=false;
+        }
+        lastForce = force;
         Set<Particle> collisionsWithParticles =
                 getNeighbours().stream()
                         .filter(p -> this.isOverlapped(p))
@@ -300,11 +316,11 @@ public class Particle {
                         .collect(Collectors.toSet());
         //System.out.println("aaa: "+collisionsWithParticles.size());
 
-        /*double overlapWithAWall = overlapWithAWall(silo);
+        double overlapWithAWall = overlapWithAWall(silo);
         if(overlapWithAWall < 0){
             Particle opositeParticle = createMirroredParticle(overlapWithAWall);
             collisionsWithParticles.add(opositeParticle);
-        }*/
+        }
 
         /**
          * calculo de fuerzas
@@ -317,12 +333,13 @@ public class Particle {
         /**
          * sumo todas las fuerzas
          */
+        
         force = granularForce.add(socialForce).add(drivenForce);
     }
 
     private Vector2D calculateDrivenForce(Double drivenVelocity, Double tau, Vector2D target) {
         Vector2D e_target = position.subtract(target).normalize();
-        return getVelocity()
+        return predVelocity
                 .subtract(e_target.scalarMultiply(drivenVelocity))
                 .scalarMultiply(mass/tau);
 

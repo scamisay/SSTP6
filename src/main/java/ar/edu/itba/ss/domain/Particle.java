@@ -26,6 +26,7 @@ public class Particle {
     private static int idCounter=0;
     private int id;
     private boolean first = true;
+    boolean isWall=false;
 
     public static final double G = 9.80665;// 9.80665 m/s2
     private boolean active = true;
@@ -236,7 +237,7 @@ public class Particle {
                 radius);
     }
 
-    private Particle createMirroredParticle(double overlapWithAWall) {
+    private Particle createMirroredParticle() {
         Vector2D influence = force.equals(force.getZero())? force: force.normalize();
         //Vector2D mirroredPos = position.add(influence.scalarMultiply(-overlapWithAWall));
         Vector2D mirroredPos = new Vector2D(position.getX(),5.0 /*Bottom padding, paja pasarlo como parametro*/);
@@ -245,28 +246,34 @@ public class Particle {
         Particle mirrored = new Particle(mirroredPos, this);
 
         //cambio el sentido de las fuerzas para la particula espejada
-        mirrored.setForce(force.negate());
-        mirrored.setVelocity(velocity.negate());
-        mirrored.setLastPosition(mirroredPos);
+        //mirrored.setForce(force.negate());
+        //mirrored.setVelocity(velocity.negate());
+        //mirrored.setLastPosition(mirroredPos);
+
+        mirrored.setForce(new Vector2D(0,0));
+        mirrored.setVelocity(new Vector2D(0,0));
+        mirrored.setLastPosition(new Vector2D(0,0));
+        mirrored.isWall=true;
         return mirrored;
     }
 
-    private double overlapWithAWall(Vector2D particlePosition, double particleRadius, Silo silo) {
+    private boolean overlapWithAWall(Vector2D particlePosition, double particleRadius, Silo silo) {
         //si esta afuera del silo o a la altura de la apertura no considero el overlap
         if(/*!silo.containsParticle(particlePosition) ||*/ silo.isInExitArea(particlePosition.getX())){
-            return 0;
+            return false;
         }
 
-        List<Vector2D> walls = Arrays.asList(
+        Vector2D wall =
                 //new Vector2D(silo.getLeftWall(), particlePosition.getY()),
                 //new Vector2D(silo.getRightWall(), particlePosition.getY()),
                 new Vector2D(particlePosition.getX(), silo.getBottomPadding())
                 //new Vector2D(particlePosition.getX(), silo.getHeight()+silo.getBottomPadding())
-        );
+        ;
 
-        return walls.stream()
+        return particlePosition.distance(wall) - particleRadius < 0;
+        /*return walls.stream()
                 .mapToDouble( w ->  particlePosition.distance(w) - particleRadius )
-                .min().getAsDouble();
+                .min().;*/
     }
 
     private Vector2D getNormalVersor(Particle p) {
@@ -323,9 +330,8 @@ public class Particle {
                     .distinct()
                     .collect(Collectors.toSet());
 
-        double overlapWithAWall = overlapWithAWall(getPosition(), getRadius(),silo);
-        if(overlapWithAWall < 0 ){
-                Particle opositeParticle = createMirroredParticle(overlapWithAWall);
+        if(overlapWithAWall (getPosition(),getRadius(),silo) ){
+                Particle opositeParticle = createMirroredParticle();
                 collisionsWithParticles.add(opositeParticle);
         }
         /**
@@ -362,6 +368,7 @@ public class Particle {
     private Vector2D calculateSocialForce(Set<Particle> collisionsWithParticles, Double A, Double B) {
         return collisionsWithParticles.stream()
                 .filter(p->overlap(p)>0)
+                .filter(p->p.isWall==false)
                 .map( p -> getNormalVersor(p).scalarMultiply(-A*Math.exp(-overlap(p)/B)))
                 .reduce( (v1,v2) -> v1.add(v2)).orElse(new Vector2D(0,0));
     }

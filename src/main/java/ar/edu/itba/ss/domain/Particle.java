@@ -20,8 +20,12 @@ public class Particle {
     private Cell cell;
     private List<Particle> neighbours = new ArrayList<>();
     private Vector2D lastForce;
+    private Vector2D prevLastForce = new Vector2D(0,0);
     private Vector2D lastPosition;
+    private Vector2D predVelocity = new Vector2D(0,0);
+    private static int idCounter=0;
     private int id;
+    private boolean first = true;
 
     public static final double G = 9.80665;// 9.80665 m/s2
     private boolean active;
@@ -46,7 +50,8 @@ public class Particle {
         this.force = new Vector2D(0,0);
         lastForce = force;
         lastPosition = position;
-        id = new Double(Math.random()).intValue();
+        id = idCounter;
+        Particle.idCounter++;
         active = true;
     }
 

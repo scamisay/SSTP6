@@ -21,6 +21,7 @@ public class Particle {
     private List<Particle> neighbours = new ArrayList<>();
     private Vector2D lastForce;
     private Vector2D lastPosition;
+    private static int idCounter=0;
     private int id;
 
     public static final double G = 9.80665;// 9.80665 m/s2
@@ -45,7 +46,8 @@ public class Particle {
         this.force = new Vector2D(0,0);
         lastForce = force;
         lastPosition = position;
-        id = new Double(Math.random()).intValue();
+        id = idCounter;
+        Particle.idCounter++;
     }
 
     @Override
@@ -290,17 +292,19 @@ public class Particle {
         /**
          * calculo las particulas que estan en colision
          */
+        //System.out.println("BB: "+id+"|"+getNeighbours().size());
         Set<Particle> collisionsWithParticles =
                 getNeighbours().stream()
                         .filter(p -> this.isOverlapped(p))
                         .distinct()
                         .collect(Collectors.toSet());
+        //System.out.println("aaa: "+collisionsWithParticles.size());
 
-        double overlapWithAWall = overlapWithAWall(silo);
+        /*double overlapWithAWall = overlapWithAWall(silo);
         if(overlapWithAWall < 0){
             Particle opositeParticle = createMirroredParticle(overlapWithAWall);
             collisionsWithParticles.add(opositeParticle);
-        }
+        }*/
 
         /**
          * calculo de fuerzas

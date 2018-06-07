@@ -24,6 +24,7 @@ public class Particle {
     private int id;
 
     public static final double G = 9.80665;// 9.80665 m/s2
+    private boolean active;
 
     public Particle(Vector2D position, double mass, double radius) {
         this.position = position;
@@ -46,6 +47,7 @@ public class Particle {
         lastForce = force;
         lastPosition = position;
         id = new Double(Math.random()).intValue();
+        active = true;
     }
 
     @Override
@@ -243,21 +245,21 @@ public class Particle {
         return mirrored;
     }
 
-    private double overlapWithAWall(Silo silo) {
+    private double overlapWithAWall(Vector2D particlePosition, double particleRadius, Silo silo) {
         //si esta afuera del silo o a la altura de la apertura no considero el overlap
-        if(!silo.containsParticle(this) || silo.isInExitArea(getPosition().getX())){
+        if(!silo.containsParticle(particlePosition) || silo.isInExitArea(particlePosition.getX())){
             return 0;
         }
 
         List<Vector2D> walls = Arrays.asList(
-                new Vector2D(silo.getLeftWall(), getPosition().getY()),
-                new Vector2D(silo.getRightWall(), getPosition().getY()),
-                new Vector2D(getPosition().getX(), silo.getBottomPadding()),
-                new Vector2D(getPosition().getX(), silo.getHeight()+silo.getBottomPadding())
+                new Vector2D(silo.getLeftWall(), particlePosition.getY()),
+                new Vector2D(silo.getRightWall(), particlePosition.getY()),
+                new Vector2D(particlePosition.getX(), silo.getBottomPadding()),
+                new Vector2D(particlePosition.getX(), silo.getHeight()+silo.getBottomPadding())
         );
 
         return walls.stream()
-                .mapToDouble( w ->  getPosition().distance(w) - getRadius() )
+                .mapToDouble( w ->  particlePosition.distance(w) - particleRadius )
                 .min().getAsDouble();
     }
 
@@ -281,7 +283,12 @@ public class Particle {
     }
 
     public void updatePositionLF(double dt, Silo silo) {
-        position = position.add(velocity.scalarMultiply(dt));
+        if(isActive()){
+            lastPosition = position;
+            position = lastPosition.add(velocity.scalarMultiply(dt));
+        }else if(isOverlappedWithTarget(silo.target)){
+            active = false;
+        }
     }
 
 
@@ -290,22 +297,29 @@ public class Particle {
         /**
          * calculo las particulas que estan en colision
          */
-        Set<Particle> collisionsWithParticles =
-                getNeighbours().stream()
-                        .filter(p -> this.isOverlapped(p))
-                        .distinct()
-                        .collect(Collectors.toSet());
+        Set<Particle> collisionsWithParticles = new HashSet<>();
 
-        double overlapWithAWall = overlapWithAWall(silo);
-        if(overlapWithAWall < 0){
-            Particle opositeParticle = createMirroredParticle(overlapWithAWall);
-            collisionsWithParticles.add(opositeParticle);
+        Vector2D granularForce = new Vector2D(0,0);
+        double overlapWithAWall = overlapWithAWall(getPosition(), getRadius(),silo);
+        if(overlapWithAWall < 0 ){
+            double prevOverlapWithAWall = overlapWithAWall(getLastPosition(), getRadius(),silo);
+            //es la primera vez q rebota
+            if(overlapWithAWall < prevOverlapWithAWall){
+                Particle opositeParticle = createMirroredParticle(overlapWithAWall);
+                collisionsWithParticles.add(opositeParticle);
+            }
+        }else {
+            collisionsWithParticles = getNeighbours().stream()
+                    .filter(p ->  p.isActive())
+                    .filter(p -> !this.isBouncing(p))
+                    .distinct()
+                    .collect(Collectors.toSet());
         }
 
         /**
          * calculo de fuerzas
          */
-        Vector2D granularForce = calculateGranularForce(collisionsWithParticles, kN, gamma, dt);
+        granularForce = granularForce.add(calculateGranularForce(collisionsWithParticles, kN, gamma, dt));
         Vector2D socialForce = calculateSocialForce(collisionsWithParticles, A, B);
         //Vector2D socialForce = new Vector2D(0,0);
         Vector2D drivenForce = calculateDrivenForce(drivenVelocity, tau, target);
@@ -316,10 +330,18 @@ public class Particle {
         force = granularForce.add(socialForce).add(drivenForce);
     }
 
+    private boolean isOverlappedWithTarget(Vector2D target) {
+        return ( getPosition().distance(target) - getRadius() ) < 0;
+    }
+
+    private boolean isBouncing(Particle p) {
+        return overlap(p) < previusOverlap(p);
+    }
+
     private Vector2D calculateDrivenForce(Double drivenVelocity, Double tau, Vector2D target) {
-        Vector2D e_target = position.subtract(target).normalize();
-        return getVelocity()
-                .subtract(e_target.scalarMultiply(drivenVelocity))
+        Vector2D e_target = target.subtract(position).normalize();
+        return e_target.scalarMultiply(drivenVelocity)
+                .subtract(getVelocity())
                 .scalarMultiply(mass/tau);
 
     }
@@ -342,6 +364,14 @@ public class Particle {
 
     public boolean isOverlapped(Particle p) {
         return overlap(p) < 0;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
 

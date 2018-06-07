@@ -29,9 +29,9 @@ public class Area {
         return upLeftPoint.getY() - downRightPoint.getY();
     }
 
-    public boolean containsParticle(Particle particle) {
-        boolean isInX = (getMinX() <= particle.getPosition().getX()) && (particle.getPosition().getX() <= getWidth());
-        boolean isInY = (getMinY() <= particle.getPosition().getY()) && (particle.getPosition().getY() <= getHeight());
+    public boolean containsParticle(Vector2D aPosition) {
+        boolean isInX = (getMinX() <= aPosition.getX()) && (aPosition.getX() <= getWidth());
+        boolean isInY = (getMinY() <= aPosition.getY()) && (aPosition.getY() <= getHeight());
         return isInX && isInY;
     }
 }

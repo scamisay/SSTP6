@@ -28,7 +28,7 @@ public class Particle {
     private boolean first = true;
 
     public static final double G = 9.80665;// 9.80665 m/s2
-    private boolean active;
+    private boolean active = true;
 
     public Particle(Vector2D position, double mass, double radius) {
         this.position = position;
@@ -284,16 +284,18 @@ public class Particle {
     }
 
     public void updateVelocityLF(double dt) {
-        velocity = velocity.add(force.scalarMultiply(dt/mass));
+        velocity = velocity.add(force.scalarMultiply(dt/(3.0*mass))).add(lastForce.scalarMultiply(5.0*dt/(6.0*mass))).
+              subtract(prevLastForce.scalarMultiply(dt/(6.0*mass)));
     }
 
-    public void updatePositionLF(double dt, Silo silo) {
-        if(isActive()){
-            lastPosition = position;
-            position = lastPosition.add(velocity.scalarMultiply(dt));
-        }else if(isOverlappedWithTarget(silo.target)){
-            active = false;
-        }
+    public void predictVelocity(double dt) {
+                predVelocity = velocity.add(force.scalarMultiply((3.0/2) *dt /mass)).subtract(lastForce.scalarMultiply((1.0/2) *dt /mass));
+
+    }
+
+    public void updatePositionLF(double dt) {
+        position = position.add(velocity.scalarMultiply(dt)).add(force.scalarMultiply((2.0/3)*FastMath.pow(dt,2)/mass ))
+                       .subtract(lastForce.scalarMultiply((1.0/6)*FastMath.pow(dt,2)/mass));
     }
 
 
@@ -302,6 +304,13 @@ public class Particle {
         /**
          * calculo las particulas que estan en colision
          */
+                if (!first) {
+                        prevLastForce=lastForce;
+                    }
+                else {
+                        first=false;
+                    }
+                lastForce = force;
         Set<Particle> collisionsWithParticles = new HashSet<>();
 
         Vector2D granularForce = new Vector2D(0,0);
@@ -346,7 +355,7 @@ public class Particle {
     private Vector2D calculateDrivenForce(Double drivenVelocity, Double tau, Vector2D target) {
         Vector2D e_target = target.subtract(position).normalize();
         return e_target.scalarMultiply(drivenVelocity)
-                .subtract(getVelocity())
+                .subtract(predVelocity)
                 .scalarMultiply(mass/tau);
 
     }

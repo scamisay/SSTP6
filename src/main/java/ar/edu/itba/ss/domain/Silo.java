@@ -21,9 +21,9 @@ public class Silo{
     private final double topPadding;
     private final double bottomPadding;
     private List<Particle> particles;
-    private double kN = 5e7;//N/m.
+    private double kN = 1e4;//N/m.
     private double kT = 1e3;//N/m.
-    private double gamma = 5e6;
+    private double gamma = kN;
     private double A = 2000;
     private double B = 0.08;
     private double TAU = 0.5;//s
@@ -150,9 +150,10 @@ public class Silo{
     public void evolveLeapFrog(double dt) {
         CellIndexMethod cim = instantiateCIM(particles);
         cim.calculate();
-        particles.forEach( p -> p.updateVelocityLF(dt));
-        particles.forEach( p -> p.updatePositionLF(dt, this));
+        particles.forEach( p -> p.updatePositionLF(dt));
+        particles.forEach( p -> p.predictVelocity(dt));
         particles.forEach( p -> p.calculateForceLF(kN, gamma, this,A,B, drivenVelocity, TAU, target, dt));
+        particles.forEach( p -> p.updateVelocityLF(dt));
     }
 
     public boolean containsParticle(Vector2D aPosition) {

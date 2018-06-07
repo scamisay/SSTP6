@@ -5,10 +5,8 @@ import ar.edu.itba.ss.algorithm.cim.Range;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.util.FastMath;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.pow;
 import static java.util.stream.Collectors.toList;
@@ -23,6 +21,7 @@ public class Particle {
     private List<Particle> neighbours = new ArrayList<>();
     private Vector2D lastForce;
     private Vector2D lastPosition;
+    private int id;
 
     public static final double G = 9.80665;// 9.80665 m/s2
 
@@ -46,6 +45,21 @@ public class Particle {
         this.force = new Vector2D(0,0);
         lastForce = force;
         lastPosition = position;
+        id = new Double(Math.random()).intValue();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Particle particle = (Particle) o;
+        return id == particle.id;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
     }
 
     /***
@@ -215,69 +229,6 @@ public class Particle {
                 radius);
     }
 
-    public void updatePosition(double dt, Silo silo) {
-        if(silo.wentOutside(this)){
-            position = silo.chooseAvailablePositionInSilo(radius);
-            initParticle();
-        }else{
-            double lastXPosition = lastPosition.getX();
-            double lastYPosition = lastPosition.getY();
-            lastPosition = position;
-            double newPosX = position.getX() + dt*velocity.getX() +(FastMath.pow(dt,2)/mass) *force.getX();
-            double newPosY = position.getY() + dt*velocity.getY() +(FastMath.pow(dt,2)/mass) *force.getY();
-            position = new Vector2D(newPosX,newPosY);
-
-            if(brokeThroughBottom(silo,lastYPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(position.getX(), Math.max(silo.getBottomPadding(), lastYPosition));
-            }else if(brokeThroughTop(silo,lastYPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(position.getX(), Math.min(silo.getBottomPadding(), lastYPosition));
-            }else if(brokeThroughLefttWall(silo,lastXPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(Math.max(silo.getLeftWall(),lastXPosition), position.getY());
-            }else if(brokeThroughRighttWall(silo,lastXPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(Math.min(silo.getRightWall(),lastXPosition), position.getY());
-            }
-        }
-    }
-
-    private boolean brokeThroughRighttWall(Silo silo, double lastXPosition) {
-        return (lastXPosition < silo.getLeftWall() ) && ( silo.getRightWall() <= position.getX());
-    }
-
-    private boolean brokeThroughLefttWall(Silo silo, double lastXPosition) {
-        return (lastXPosition > silo.getLeftWall() ) && ( silo.getLeftWall() >= position.getX());
-    }
-
-
-    private boolean brokeThroughBottom(Silo silo, double lastYPosition) {
-        return !silo.isInExitArea(position.getX()) &&
-                position.getX() >= silo.getLeftWall() &&
-                position.getX() <= silo.getRightWall() &&
-                (lastYPosition > silo.getBottomPadding() ) && ( silo.getBottomPadding() >= position.getY());
-    }
-
-    private boolean brokeThroughTop(Silo silo, double lastYPosition) {
-        double top = silo.getBottomPadding() + silo.getHeight();
-        return !silo.isInExitArea(position.getX()) &&
-                position.getX() >= silo.getLeftWall() &&
-                position.getX() <= silo.getRightWall() &&
-                (lastYPosition < top ) && ( top <= position.getY());
-    }
-
-    void updateVelocity(double dt) {
-        double newVx = velocity.getX() + (dt/(2*mass))*(lastForce.getX()+force.getX());
-        double newVy = velocity.getY() + (dt/(2*mass))*(lastForce.getY()+force.getY());
-        velocity = new Vector2D(newVx,newVy);
-    }
-
-    void updateForce(){
-        lastForce=force;
-        //force = new Vector2D(0,0);
-    }
-
     private Particle createMirroredParticle(double overlapWithAWall) {
         Vector2D influence = force.equals(force.getZero())? force: force.normalize();
         Vector2D mirroredPos = position.add(influence.scalarMultiply(overlapWithAWall));
@@ -291,22 +242,6 @@ public class Particle {
         mirrored.setLastPosition(mirroredPos);
         return mirrored;
     }
-
-
-    private double overlapWithABottomWall(Silo silo) {
-        if(!silo.containsParticle(this) || silo.isInExitArea(getPosition().getX())){
-            return 0;
-        }
-
-        List<Vector2D> walls = Arrays.asList(
-                new Vector2D(getPosition().getX(), silo.getBottomPadding())
-        );
-
-        return walls.stream()
-                .mapToDouble( w -> getRadius() - getPosition().distance(w) )
-                .max().getAsDouble();
-    }
-
 
     private double overlapWithAWall(Silo silo) {
         //si esta afuera del silo o a la altura de la apertura no considero el overlap
@@ -326,31 +261,9 @@ public class Particle {
                 .min().getAsDouble();
     }
 
-
-    private double getNormalForce(Particle p, double kN) {
-        //return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)-gamma*overlapDerivate(p)).getNorm();
-        return getNormalVersor(p).scalarMultiply(-1*kN*overlap(p)).getNorm();
-    }
-
-    private double getTangentialForce(Particle p, double kT) {
-        double tangentialVelocity = getTangentialVelocity(p);
-        return getTangentialVersor(p).scalarMultiply(tangentialVelocity*overlap(p)*kT).getNorm();
-    }
-
-    //TODO: chequear esto en clase: esta bien calculada la velocidad tangencial entre dos particulas???
-    private double getTangentialVelocity(Particle p) {
-        return getVelocity().add(p.getVelocity()).getNorm();
-    }
-
     private Vector2D getNormalVersor(Particle p) {
         return p.getPosition().subtract(position).normalize();
     }
-
-    private Vector2D getTangentialVersor(Particle p) {
-        Vector2D normal = getNormalVersor(p);
-        return new Vector2D(-1*normal.getY(), normal.getX());
-    }
-
 
     public void resetNeighbours() {
         neighbours = new ArrayList<>();
@@ -365,68 +278,23 @@ public class Particle {
 
     public void updateVelocityLF(double dt) {
         velocity = velocity.add(force.scalarMultiply(dt/mass));
-        /*double newVx = velocity.getX() + (dt/(mass))*(force.getX());
-        double newVy = velocity.getY() + (dt/(mass))*(force.getY());
-        velocity = new Vector2D(newVx,newVy);*/
     }
 
     public void updatePositionLF(double dt, Silo silo) {
         position = position.add(velocity.scalarMultiply(dt));
     }
 
-   /* public void updatePositionLF(double dt, Silo silo) {
-       *//* if(silo.wentOutside(this)){
-            position = silo.chooseAvailablePositionInSilo(radius);
-            initParticle();
-        }else{*//*
-            double lastXPosition = lastPosition.getX();
-            double lastYPosition = lastPosition.getY();
-
-            double newPosX = lastPosition.getX() + (dt/mass) *force.getX();
-            double newPosY = lastPosition.getY() + (dt/mass) *force.getY();
-
-            if(!silo.isInExitArea(newPosX) && (newPosY-getRadius())<=silo.getBottomPadding() ){
-                newPosY = silo.getBottomPadding() + getRadius();
-            }
-
-            if((newPosX-getRadius())<=silo.getLeftWall() ){
-                newPosX = silo.getLeftWall() + getRadius();
-            }
-
-            if((newPosX+getRadius())>=silo.getRightWall() ){
-                newPosX = silo.getRightWall() - getRadius();
-            }
-
-            position = new Vector2D(newPosX,newPosY);
-            lastPosition = position;
-
-            *//*if(brokeThroughBottom(silo,lastYPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(position.getX(), Math.max(silo.getBottomPadding(), lastYPosition));
-            }else if(brokeThroughTop(silo,lastYPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(position.getX(), Math.min(silo.getBottomPadding(), lastYPosition));
-            }else if(brokeThroughLefttWall(silo,lastXPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(Math.max(silo.getLeftWall(),lastXPosition), position.getY());
-            }else if(brokeThroughRighttWall(silo,lastXPosition)){
-                lastPosition = new Vector2D(lastXPosition, lastYPosition);
-                position = new Vector2D(Math.min(silo.getRightWall(),lastXPosition), position.getY());
-            }else {
-                lastPosition = position;
-            }*//*
-       *//* }*//*
-    }*/
 
     public void calculateForceLF(double kN, double gamma, Silo silo, Double A, Double B,
                                  Double drivenVelocity, Double tau, Vector2D target, double dt) {
         /**
          * calculo las particulas que estan en colision
          */
-        List<Particle> collisionsWithParticles =
+        Set<Particle> collisionsWithParticles =
                 getNeighbours().stream()
                         .filter(p -> this.isOverlapped(p))
-                        .collect(toList());
+                        .distinct()
+                        .collect(Collectors.toSet());
 
         double overlapWithAWall = overlapWithAWall(silo);
         if(overlapWithAWall < 0){
@@ -439,6 +307,7 @@ public class Particle {
          */
         Vector2D granularForce = calculateGranularForce(collisionsWithParticles, kN, gamma, dt);
         Vector2D socialForce = calculateSocialForce(collisionsWithParticles, A, B);
+        //Vector2D socialForce = new Vector2D(0,0);
         Vector2D drivenForce = calculateDrivenForce(drivenVelocity, tau, target);
 
         /**
@@ -455,13 +324,13 @@ public class Particle {
 
     }
 
-    private Vector2D calculateSocialForce(List<Particle> collisionsWithParticles, Double A, Double B) {
+    private Vector2D calculateSocialForce(Set<Particle> collisionsWithParticles, Double A, Double B) {
         return collisionsWithParticles.stream()
                 .map( p -> getNormalVersor(p).scalarMultiply(A*Math.exp(overlap(p)/B)))
                 .reduce( (v1,v2) -> v1.add(v2)).orElse(new Vector2D(0,0));
     }
 
-    private Vector2D calculateGranularForce(List<Particle> collisionsWithParticles, double kN, double gamma, double dt) {
+    private Vector2D calculateGranularForce(Set<Particle> collisionsWithParticles, double kN, double gamma, double dt) {
         return collisionsWithParticles.stream()
                 .map(p -> getNormalForce(p,kN,gamma, dt)
                 ).reduce((v1,v2)->v1.add(v2)).orElse(new Vector2D(0,0));

@@ -182,6 +182,6 @@ public class Silo{
     }
 
     public boolean isSomeoneLeftToEscape() {
-        return particles.stream().filter( p -> p.getPosition().getY() >= getBottomPadding()).count() > 0;
+        return particles.stream().filter( p -> (p.getPosition().getY() + 4*p.getRadius()) >= getBottomPadding()).count() > 0;
     }
 }

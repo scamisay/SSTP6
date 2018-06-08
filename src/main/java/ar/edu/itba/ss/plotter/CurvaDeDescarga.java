@@ -70,7 +70,7 @@ public class CurvaDeDescarga {
         double bucketSize = (maxValue - minValue)/ buckets;
 
         List<Double> values = new ArrayList<>();
-        for(double x = minValue; x <= maxValue; x+= bucketSize){
+        for(double x = minValue; x < maxValue+bucketSize; x+= bucketSize){
             values.add(x);
         }
         return values;
@@ -86,9 +86,9 @@ public class CurvaDeDescarga {
 
 
     public static void main(String[] args) {
-        CurvaDeDescarga cd = new CurvaDeDescarga(51,3);
+        CurvaDeDescarga cd = new CurvaDeDescarga(50,3);
         cd.process(1);
-        Map<Double, ErrorPoint> plot = cd.plotAdaptingX(4);
+        Map<Double, ErrorPoint> plot = cd.plotAdaptingX(6);
         String x = cd.printXValues(plot);
         String y = cd.printYValues(plot);
         String minMax = cd.printMinMaxValues(plot);

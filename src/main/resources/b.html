@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Desplazamiento Cuadrático Medio en función del tiempo</title>
+</head>
+<body>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="height: 800px; margin: auto; min-width: 510px; max-width: 800px"></div>
+
+<script>
+
+
+    Highcharts.chart('container', {
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: 'Desplazamiento Cuadrático Medio para dos Particulas Grandes con distintos N'
+        },
+        subtitle: {
+            text: 'simulaciones por punto=10'
+        },
+        xAxis: {
+            categories: [
+                0.0, 1.7107374999976803, 3.4214749999953606, 5.132212499993041, 6.842949999990721
+            ],title: {
+                text: 'Tiempo (segundos)',
+                style: {
+                    fontSize:'25px'
+                }
+            },labels: {
+                format: '{value:.2f}'
+            }
+        },
+        yAxis: [{ // Primary yAxis
+            labels: {
+                format: '{value}',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            title: {
+                text: 'Peatones que salieron',
+                style: {
+                    fontSize:'25px'
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: '',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value} ',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: true
+        }],
+
+        tooltip: {
+            shared: true
+        },
+
+        series: [
+        {
+            name: 'particula grande, N=401',
+            type: 'line',
+            data: [
+                0.0, 0.3333333333333333, 3.3333333333333335, 7.0, 9.0
+            ],
+            tooltip: {
+                pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+            }
+        }, {
+            name: 'error de probabilidad',
+            type: 'errorbar',
+            data: [
+                [0.000, 0.000], [0.000, 1.000], [2.000, 5.000], [6.000, 8.000], [9.000, 9.000]
+            ],
+            tooltip: {
+                pointFormat: '(error range: {point.low:.4f}-{point.high:.4f})<br/>'
+            }
+        }
+        ]
+    });
+</script>
+</body>
+</html>

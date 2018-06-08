@@ -73,8 +73,13 @@ public class Particle {
     /***
      * getters and setters start
      */
+
     public Cell getCell() {
         return cell;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void setCell(Cell cell) {

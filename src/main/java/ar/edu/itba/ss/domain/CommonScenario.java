@@ -1,11 +1,8 @@
-package ar.edu.itba.ss.execution;
+package ar.edu.itba.ss.domain;
 
 import ar.edu.itba.ss.algorithm.GranularSystem;
-import ar.edu.itba.ss.domain.Silo;
 
-import java.util.ArrayList;
-
-public class Main {
+public class CommonScenario {
 
     //Dimensiones de la habitacion
     private static final double WIDTH = 20;
@@ -16,19 +13,15 @@ public class Main {
     private static final double DT = 5e-5;
     private static final long DT2 = (long)1e2;
 
-    private static final int PARTICLE_NUMBER = 200;
+    private static final double topPadding = 0;
+    private static final double bottomPadding = 5;
 
-    public static void main(String[] args) {
-
-        double topPadding = 0;
-        double bottomPadding = 5;
-        double drivenVelocity = 5;
+    public static GranularSystem simulate(int numberOfParticles, double drivenVelocity ){
         Silo room = new Silo(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,drivenVelocity);
-        GranularSystem system = new GranularSystem(DT, DT2, room, PARTICLE_NUMBER);
+        GranularSystem system = new GranularSystem(DT, DT2, room, numberOfParticles);
         system.setPrintable();
         system.recordStatistics();
         system.simulate();
-        System.out.println(1);
+        return system;
     }
-
 }

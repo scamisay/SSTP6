@@ -16,7 +16,6 @@ public class Silo{
     private final double width;
     private final double height;
     private final double exitOpeningSize;
-    private double falldownLimit;
     private Area insideSiloArea;
     private final double topPadding;
     private final double bottomPadding;
@@ -130,23 +129,6 @@ public class Silo{
         return bottomPadding;
     }
 
-    public void setkN(double kN) {
-        this.kN = kN;
-    }
-
-    public void setGamma(double gamma) {
-        this.gamma = gamma;
-    }
-
-    /*public void evolve(double dt) {
-        CellIndexMethod cim = instantiateCIM(particles);
-        cim.calculate();
-        particles.forEach( p -> p.updatePosition(dt, this));
-        particles.forEach(Particle::updateForce);
-        particles.forEach( p -> p.calculateForce(kN, kT, this));
-        particles.forEach( p -> p.updateVelocity(dt));
-    }*/
-
     public void evolveLeapFrog(double dt) {
         CellIndexMethod cim = instantiateCIM(particles);
         cim.calculate();
@@ -154,10 +136,6 @@ public class Silo{
         particles.forEach( p -> p.predictVelocity(dt));
         particles.forEach( p -> p.calculateForceLF(kN, gamma, this,A,B, drivenVelocity, TAU, target, dt));
         particles.forEach( p -> p.updateVelocityLF(dt));
-    }
-
-    public boolean containsParticle(Vector2D aPosition) {
-        return insideSiloArea.containsParticle(aPosition);
     }
 
     public double getLeftWall() {
@@ -168,17 +146,10 @@ public class Silo{
         return insideSiloArea.getWidth();
     }
 
-    public boolean wentOutside(Particle particle) {
-        return (particle.getPosition().getY() <= 0 )||
-                (getLeftWall() > particle.getPosition().getX()-particle.getRadius()) ||
-                (getRightWall() < particle.getPosition().getX()+particle.getRadius());
-    }
-
-    //todo: ponerlo dentro del silo sin superposiciones
-    public Vector2D chooseAvailablePositionInSilo(double radius) {
-        ParticlesCreator creator = new ParticlesCreator(insideSiloArea);
-        Vector2D relocatedPosition = creator.createRandomPosition(radius);
-        return relocatedPosition;
+    public boolean hasEscaped(Particle particle) {
+        return (particle.getPosition().getY() < getBottomPadding())
+                &&
+                (particle.getLastPosition().getY() >= getBottomPadding());
     }
 
     public double getKineticEnergy() {
@@ -201,5 +172,16 @@ public class Silo{
                 .collect(Collectors.toList());
         particlesRecentlyFallen.addAll(newFallen);
         return newFallen.size();
+    }
+
+    public List<Vector2D> getParticlesHaveJustEscaped(double dt) {
+        return particles.stream()
+                .filter(p->hasEscaped(p))
+                .map(p-> new Vector2D(dt,p.getId()))
+                .collect(Collectors.toList());
+    }
+
+    public boolean isSomeoneLeftToEscape() {
+        return particles.stream().filter( p -> p.getPosition().getY() >= getBottomPadding()).count() > 0;
     }
 }

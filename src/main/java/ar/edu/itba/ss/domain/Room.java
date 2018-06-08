@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Silo{
+public class Room {
 
     private static final int MAX_CREATION_TRIES = 1000;
 
@@ -35,7 +35,7 @@ public class Silo{
     private static final int M =4;
 
     // L > W > D
-    public Silo(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding, double drivenVelocity) {
+    public Room(double width, double height, double exitOpeningSize, double topPadding, double bottomPadding, double drivenVelocity) {
         if(exitOpeningSize > width || width > height){
             throw new IllegalArgumentException("height > width > exitOpeningSize");
         }

@@ -56,6 +56,13 @@ public class CurvaDeDescarga {
                 .collect(Collectors.joining(", "));
     }
 
+    private String printCaudal(Map<Double, ErrorPoint> plot) {
+        return plot.keySet().stream().sorted()
+                .map(x -> x == 0 ? 0:plot.get(x).getAverage()/x)
+                .map( c -> c+"")
+                .collect(Collectors.joining(", "));
+    }
+
     private String printMinMaxValues(Map<Double, ErrorPoint> plot) {
         return plot.keySet().stream().sorted()
                 .map(x -> String.format("[%.3f, %.3f]", plot.get(x).getMin(), plot.get(x).getMax()))
@@ -86,15 +93,18 @@ public class CurvaDeDescarga {
 
 
     public static void main(String[] args) {
-        CurvaDeDescarga cd = new CurvaDeDescarga(50,3);
+        CurvaDeDescarga cd = new CurvaDeDescarga(100,3);
         cd.process(1);
-        Map<Double, ErrorPoint> plot = cd.plotAdaptingX(6);
+        Map<Double, ErrorPoint> plot = cd.plotAdaptingX(9);
         String x = cd.printXValues(plot);
         String y = cd.printYValues(plot);
         String minMax = cd.printMinMaxValues(plot);
+        String caudal = cd.printCaudal(plot);
         System.out.println(x);
         System.out.println(y);
         System.out.println(minMax);
+        System.out.println(caudal);
+
     }
 
 }

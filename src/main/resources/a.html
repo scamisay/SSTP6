@@ -19,32 +19,32 @@
             zoomType: 'xy'
         },
         title: {
-            text: 'Desplazamiento Cuadrático Medio para dos Particulas Grandes con distintos N'
-        },
-        subtitle: {
-            text: 'simulaciones por punto=10'
+            text: 'a'
         },
         xAxis: {
             categories: [
-                0.0, 3.609599999993255, 7.21919999998651, 10.828799999979765, 14.43839999997302
+                0.0, 2.4693555555751114, 4.938711111150223, 7.408066666725334, 9.877422222300446, 12.346777777875557, 14.816133333450669, 17.28548888902578, 19.75484444460089, 22.224200000176005
             ],title: {
-                text: 'Tiempo (segundos)',
+                text: 'tiempo (s)',
                 style: {
                     fontSize:'25px'
                 }
             },labels: {
-                format: '{value:.2f}'
+                format: '{value:.2f}',
+                style: {
+                    fontSize:'20px'
+                }
             }
         },
         yAxis: [{ // Primary yAxis
             labels: {
                 format: '{value}',
                 style: {
-                    color: Highcharts.getOptions().colors[1]
+                    fontSize:'20px'
                 }
             },
             title: {
-                text: 'Peatones que salieron',
+                text: 'peatones que salieron',
                 style: {
                     fontSize:'25px'
                 }
@@ -70,25 +70,39 @@
         },
 
         series: [
-        {
-            name: 'particula grande, N=401',
-            type: 'line',
-            data: [
-                0.0, 18.0, 35.0, 45.0, 50.0
-            ],
-            tooltip: {
-                pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+            {
+                type: 'line',
+                data: [
+                    0.0, 9.0, 24.0, 36.0, 53.0, 68.0, 80.0, 88.0, 96.0, 100.0
+                ],
+                tooltip: {
+                    pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+                }
+            }, {
+                type: 'line',
+                data: [
+                    0.0, 14.0, 35.0, 49.0, 62.0, 73.0, 79.0, 88.0, 95.0, 100.0
+                ],
+                tooltip: {
+                    pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+                }
+            },{
+                type: 'line',
+                data: [
+                    0.0, 9.0, 26.0, 44.0, 61.0, 71.0, 82.0, 91.0, 96.0, 100.0
+                ],
+                tooltip: {
+                    pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+                }
+            },{
+                type: 'line',
+                data: [
+                    0.0, 5.0, 29.0, 47.0, 63.0, 75.0, 86.0, 94.0, 98.0, 100.0
+                ],
+                tooltip: {
+                    pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+                }
             }
-        }, {
-            name: 'error de probabilidad',
-            type: 'errorbar',
-            data: [
-                [0.000, 0.000], [18.000, 18.000], [35.000, 35.000], [45.000, 45.000], [50.000, 50.000]
-            ],
-            tooltip: {
-                pointFormat: '(error range: {point.low:.4f}-{point.high:.4f})<br/>'
-            }
-        }
         ]
     });
 </script>

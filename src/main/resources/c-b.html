@@ -19,7 +19,7 @@
             zoomType: 'xy'
         },
         title: {
-            text: 'b'
+            text: 'c - b'
         },
         xAxis: {
             categories: [
@@ -70,23 +70,26 @@
         },
 
         series: [
-        {
-            type: 'line',
-            data: [
-                0.0, 11.0, 31.25, 47.75, 61.5, 73.75, 83.5, 91.0, 96.75, 100.0
-            ],
-            tooltip: {
-                pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+            {
+                name: 'curva de descarga',
+                type: 'line',
+                data: [
+                    0.0, 11.0, 31.25, 47.75, 61.5, 73.75, 83.5, 91.0, 96.75, 100.0
+                ],
+                tooltip: {
+                    pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+                }
+            },
+            {
+                name: 'caudal',
+                type: 'line',
+                data: [
+                    0.0, 4.322832634292374, 6.14038726461985, 6.255007826892753, 6.0421410683859325, 5.796525577801138, 5.469038257021413, 5.108802204163715, 4.752659742815764, 4.366497610396338
+                ],
+                tooltip: {
+                    pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+                }
             }
-        }, {
-            type: 'errorbar',
-            data: [
-                [0.000, 0.000], [7.000, 18.000], [26.000, 47.000], [41.000, 62.000], [55.000, 74.000], [70.000, 84.000], [79.000, 93.000], [89.000, 97.000], [95.000, 100.000], [100.000, 100.000]
-            ],
-            tooltip: {
-                pointFormat: '(error range: {point.low:.4f}-{point.high:.4f})<br/>'
-            }
-        }
         ]
     });
 </script>

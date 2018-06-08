@@ -1,9 +1,7 @@
 package ar.edu.itba.ss.execution;
 
 import ar.edu.itba.ss.algorithm.GranularSystem;
-import ar.edu.itba.ss.domain.Silo;
-
-import java.util.ArrayList;
+import ar.edu.itba.ss.domain.Room;
 
 public class Main {
 
@@ -23,7 +21,7 @@ public class Main {
         double topPadding = 0;
         double bottomPadding = 5;
         double drivenVelocity = 5;
-        Silo room = new Silo(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,drivenVelocity);
+        Room room = new Room(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,drivenVelocity);
         GranularSystem system = new GranularSystem(DT, DT2, room, PARTICLE_NUMBER);
         system.setPrintable();
         system.recordStatistics();

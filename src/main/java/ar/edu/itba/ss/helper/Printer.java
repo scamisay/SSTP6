@@ -1,7 +1,7 @@
 package ar.edu.itba.ss.helper;
 
 import ar.edu.itba.ss.domain.Particle;
-import ar.edu.itba.ss.domain.Silo;
+import ar.edu.itba.ss.domain.Room;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,11 +15,11 @@ public class Printer {
 
     private double height;
     private double width;
-    private Silo room;
+    private Room room;
 
     private static final String FILE_NAME_OVITO = "ovito.xyz";
 
-    public Printer(Silo room) {
+    public Printer(Room room) {
         this.room = room;
         this.height = room.getScenarioHeight();
         this.width = room.getWidth();

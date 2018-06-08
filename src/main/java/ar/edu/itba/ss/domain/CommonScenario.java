@@ -17,7 +17,7 @@ public class CommonScenario {
     private static final double bottomPadding = 5;
 
     public static GranularSystem simulate(int numberOfParticles, double drivenVelocity ){
-        Silo room = new Silo(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,drivenVelocity);
+        Room room = new Room(WIDTH, HEIGHT, EXIT_WIDTH, topPadding,bottomPadding,drivenVelocity);
         GranularSystem system = new GranularSystem(DT, DT2, room, numberOfParticles);
         system.setPrintable();
         system.recordStatistics();

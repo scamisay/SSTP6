@@ -19,13 +19,13 @@
             zoomType: 'xy'
         },
         title: {
-            text: 'b'
+            text: 'd'
         },
         xAxis: {
             categories: [
-                0.0, 2.5446277777998323, 5.089255555599665, 7.633883333399497, 10.17851111119933, 12.723138888999161, 15.267766666798993, 17.812394444598826, 20.35702222239866, 22.90165000019849
+                0.8, 1.84, 2.88, 3.92, 4.96, 6.0
             ],title: {
-                text: 'tiempo (s)',
+                text: 'driven velocity (m/s)',
                 style: {
                     fontSize:'25px'
                 }
@@ -44,7 +44,7 @@
                 }
             },
             title: {
-                text: 'peatones que salieron',
+                text: 'tiempo de evacuación (s)',
                 style: {
                     fontSize:'25px'
                 }
@@ -70,23 +70,23 @@
         },
 
         series: [
-        {
-            type: 'line',
-            data: [
-                0.0, 11.0, 31.25, 47.75, 61.5, 73.75, 83.5, 91.0, 96.75, 100.0
-            ],
-            tooltip: {
-                pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+            {
+                type: 'line',
+                data: [
+                    27.944550000365897, 12.127066666645073, 8.120199999987745, 5.813266666659788, 4.937999999995161, 3.869816666664317
+                ],
+                tooltip: {
+                    pointFormat: '<span style="font-weight: bold; color: {series.color}">{series.name}</span>: <b>{point.y:.4f}</b> '
+                }
+            }, {
+                type: 'errorbar',
+                data: [
+                    [26.683, 29.054], [11.571, 13.097], [7.706, 8.802], [5.479, 6.053], [4.546, 5.340], [3.847, 3.900]
+                ],
+                tooltip: {
+                    pointFormat: '(error range: {point.low:.4f}-{point.high:.4f})<br/>'
+                }
             }
-        }, {
-            type: 'errorbar',
-            data: [
-                [0.000, 0.000], [7.000, 18.000], [26.000, 47.000], [41.000, 62.000], [55.000, 74.000], [70.000, 84.000], [79.000, 93.000], [89.000, 97.000], [95.000, 100.000], [100.000, 100.000]
-            ],
-            tooltip: {
-                pointFormat: '(error range: {point.low:.4f}-{point.high:.4f})<br/>'
-            }
-        }
         ]
     });
 </script>

@@ -1,18 +1,11 @@
 package ar.edu.itba.ss.algorithm;
 
-import ar.edu.itba.ss.domain.Particle;
-import ar.edu.itba.ss.domain.Silo;
+import ar.edu.itba.ss.domain.Room;
 import ar.edu.itba.ss.helper.Printer;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static ar.edu.itba.ss.algorithm.ParticlesCreator.MAX_RADIUS;
-import static ar.edu.itba.ss.algorithm.ParticlesCreator.MIN_RADIUS;
-import static ar.edu.itba.ss.domain.Particle.G;
 
 public class GranularSystem {
 
@@ -20,7 +13,7 @@ public class GranularSystem {
     private long dt2;
     private int particleNumbers;
 
-    private Silo silo;
+    private Room room;
     private Printer printer;
 
     private boolean updateStatisticalValues;
@@ -30,10 +23,10 @@ public class GranularSystem {
 
     private static final double SLIDING_WINDOW = .2;
 
-    public GranularSystem(double dt, long dt2, Silo silo, int particleNumbers) {
+    public GranularSystem(double dt, long dt2, Room room, int particleNumbers) {
         this.dt = dt;
         this.dt2 = dt2;
-        this.silo = silo;
+        this.room = room;
         this.particleNumbers = particleNumbers;
     }
 
@@ -42,43 +35,31 @@ public class GranularSystem {
     }
 
     public void setPrintable(){
-        printer = new Printer(silo);
+        printer = new Printer(room);
     }
 
     public void simulate(){
-        silo.fillSilo(particleNumbers);
+        room.fillSilo(particleNumbers);
 
         double t = 0;
         long i = 0;
 
-        for (; silo.isSomeoneLeftToEscape() ; t+=dt, i++ ){
+        for (; room.isSomeoneLeftToEscape() && (t < 100) &&
+                ((particleNumbers - egresos.size())>0); t+=dt, i++ ){
             if (i % dt2 == 0 ) {
                 if(printer != null){
-                    printer.printState(t, silo.getParticles());
-                    System.out.println(t);
+                    printer.printState(t, room.getParticles());
+                    if((i*1e5)%555 == 0){
+                        System.out.println(particleNumbers - egresos.size() +" t="+t);
+                    }
+                    //System.out.println(t);
                 }
 
-               /* if(t > nextStatPoint){
-                    updateKineticEnergy(t);
-                    updateCaudal(t);
-
-                    if(itStatPoints.hasNext()){
-                        nextStatPoint = itStatPoints.next();
-                        npList.add(calculateNp());
-                    }else {
-                        nextStatPoint = simulationTime;
-                    }
-                }*/
-
-                /*if(updateStatisticalValues && (t > simulationTime*SLIDING_WINDOW)){
-                    updateKineticEnergy(t);
-                    updateCaudal(t);
-                }*/
             }
             if(updateStatisticalValues ){
                 updateEscapes(t);
             }
-            silo.evolveLeapFrog(dt);
+            room.evolveLeapFrog(dt);
 
         }
     }
@@ -88,7 +69,7 @@ public class GranularSystem {
     }
 
     private void updateEscapes(double t) {
-        List<Vector2D> escaped = silo.getParticlesHaveJustEscaped(t);
+        List<Vector2D> escaped = room.getParticlesHaveJustEscaped(t);
         if(!escaped.isEmpty()){
             egresos.addAll(escaped);
         }

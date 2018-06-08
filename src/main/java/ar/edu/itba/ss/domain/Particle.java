@@ -262,17 +262,17 @@ public class Particle {
         return mirrored;
     }
 
-    private boolean overlapWithAWall(Vector2D particlePosition, double particleRadius, Silo silo) {
-        //si esta afuera del silo o a la altura de la apertura no considero el overlap
-        if(/*!silo.containsParticle(particlePosition) ||*/ silo.isInExitArea(particlePosition.getX())){
+    private boolean overlapWithAWall(Vector2D particlePosition, double particleRadius, Room room) {
+        //si esta afuera del room o a la altura de la apertura no considero el overlap
+        if(/*!room.containsParticle(particlePosition) ||*/ room.isInExitArea(particlePosition.getX())){
             return false;
         }
 
         Vector2D wall =
-                //new Vector2D(silo.getLeftWall(), particlePosition.getY()),
-                //new Vector2D(silo.getRightWall(), particlePosition.getY()),
-                new Vector2D(particlePosition.getX(), silo.getBottomPadding())
-                //new Vector2D(particlePosition.getX(), silo.getHeight()+silo.getBottomPadding())
+                //new Vector2D(room.getLeftWall(), particlePosition.getY()),
+                //new Vector2D(room.getRightWall(), particlePosition.getY()),
+                new Vector2D(particlePosition.getX(), room.getBottomPadding())
+                //new Vector2D(particlePosition.getX(), room.getHeight()+room.getBottomPadding())
         ;
 
         return particlePosition.distance(wall) - particleRadius < 0;
@@ -313,7 +313,7 @@ public class Particle {
     }
 
 
-    public void calculateForceLF(double kN, double gamma, Silo silo, Double A, Double B,
+    public void calculateForceLF(double kN, double gamma, Room room, Double A, Double B,
                                  Double drivenVelocity, Double tau, Vector2D target, double dt) {
         /**
          * calculo las particulas que estan en colision
@@ -329,13 +329,11 @@ public class Particle {
 
         Vector2D granularForce = new Vector2D(0,0);
 
-            collisionsWithParticles = getNeighbours().stream()
-                    //.filter(p ->  p.isActive())
-                    //.filter(p -> !this.isBouncing(p))
-                    .distinct()
-                    .collect(Collectors.toSet());
+        collisionsWithParticles = getNeighbours().stream()
+                .distinct()
+                .collect(Collectors.toSet());
 
-        if(overlapWithAWall (getPosition(),getRadius(),silo) ){
+        if(overlapWithAWall (getPosition(),getRadius(), room) ){
                 Particle opositeParticle = createMirroredParticle();
                 collisionsWithParticles.add(opositeParticle);
         }
@@ -344,13 +342,11 @@ public class Particle {
          */
         granularForce = granularForce.add(calculateGranularForce(collisionsWithParticles, kN, gamma, dt));
         Vector2D socialForce = calculateSocialForce(collisionsWithParticles, A, B);
-        //Vector2D socialForce = new Vector2D(0,0);
         Vector2D drivenForce = calculateDrivenForce(drivenVelocity, tau, target);
 
         /**
          * sumo todas las fuerzas
          */
-
         force = granularForce.add(socialForce).add(drivenForce);
     }
 
@@ -367,7 +363,6 @@ public class Particle {
         return e_target.scalarMultiply(drivenVelocity)
                 .subtract(predVelocity)
                 .scalarMultiply(mass/tau);
-
     }
 
     private Vector2D calculateSocialForce(Set<Particle> collisionsWithParticles, Double A, Double B) {

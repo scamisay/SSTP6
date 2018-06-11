@@ -44,7 +44,7 @@ public class GranularSystem {
         double t = 0;
         long i = 0;
 
-        for (; room.isSomeoneLeftToEscape() && (t < 100) &&
+        for (; room.isSomeoneLeftToEscape() && (t < 300) &&
                 ((particleNumbers - egresos.size())>0); t+=dt, i++ ){
             if (i % dt2 == 0 ) {
                 if(printer != null){

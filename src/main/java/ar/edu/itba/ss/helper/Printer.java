@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +19,7 @@ public class Printer {
     private double width;
     private Room room;
 
-    private static final String FILE_NAME_OVITO = "ovito.xyz";
+    private static final String FILE_NAME_OVITO = "ovito_"+new SimpleDateFormat("dd_MM_yyyy_HHmmss").format(new Date()) +".xyz";
 
     public Printer(Room room) {
         this.room = room;

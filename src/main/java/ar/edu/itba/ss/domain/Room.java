@@ -20,7 +20,7 @@ public class Room {
     private final double topPadding;
     private final double bottomPadding;
     private List<Particle> particles;
-    private double kN = 1e5;//N/m.
+    private double kN = 1.2e5;//N/m.
     private double kT = 1e3;//N/m.
     private double gamma = 1e3;
     private double A = 2000;
@@ -47,7 +47,7 @@ public class Room {
         particles = new ArrayList<>();
         insideSiloArea = new Area(0,bottomPadding+height,width,bottomPadding);
         this.drivenVelocity = drivenVelocity;
-        target = new Vector2D(width/2, 0);
+        target = new Vector2D(width/2, 4.95);
     }
 
     public void fillSilo(int particlesToAdd) {
@@ -147,9 +147,14 @@ public class Room {
     }
 
     public boolean hasEscaped(Particle particle) {
-        return (particle.getPosition().getY() < getBottomPadding())
+        boolean ret = (particle.getPosition().getY() < getBottomPadding())
                 &&
                 (particle.getLastPosition().getY() >= getBottomPadding());
+        if (ret) {
+            particle.position = Vector2D.POSITIVE_INFINITY;
+            //particles.remove(particle);
+        }
+        return ret;
     }
 
     public double getKineticEnergy() {

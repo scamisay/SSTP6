@@ -18,6 +18,7 @@ public class Printer {
     private double height;
     private double width;
     private Room room;
+    private StringBuilder output = new StringBuilder();
 
     private static final String FILE_NAME_OVITO = "ovito_"+new SimpleDateFormat("dd_MM_yyyy_HHmmss").format(new Date()) +".xyz";
 
@@ -42,7 +43,12 @@ public class Printer {
     }
 
     private void printForOvito(double time, List<Particle> particles) {
-        printStringToFile(FILE_NAME_OVITO, printParticles(time, particles));
+        output.append(printParticles(time,particles));
+        //printStringToFile(FILE_NAME_OVITO, printParticles(time, particles));
+    }
+
+    public void printAll() {
+        printStringToFile(FILE_NAME_OVITO,output.toString());
     }
 
     private String printParticles(double time, List<Particle> particles) {

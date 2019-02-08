@@ -62,6 +62,7 @@ public class GranularSystem {
             room.evolveLeapFrog(dt);
 
         }
+        printer.printAll();
     }
 
     public List<Vector2D> getEgresos() {

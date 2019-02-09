@@ -24,7 +24,7 @@ public class ParticlesCreator {
     public Particle create() {
         double radius = createRadius();
         Vector2D position = createPosition(radius);
-        return new Particle(position, MASS, radius);
+        return new Particle(position, MASS, radius,true);
     }
 
     private double createRadius() {

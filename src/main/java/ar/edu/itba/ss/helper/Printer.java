@@ -52,8 +52,10 @@ public class Printer {
     }
 
     private String printParticles(double time, List<Particle> particles) {
-        String printedBorders = printSiloBorders();
-        int particlesInBorder = printedBorders.split("\n").length;
+        //String printedBorders = printSiloBorders();
+        String printedBorders = "";
+        //int particlesInBorder = printedBorders.split("\n").length;
+        int particlesInBorder = 0;
         return (particles.size()+particlesInBorder+2)+"\n"+
                 time + "\n" +
                 "0 0 0 0 0 0 0.0001 0 0 0\n"+

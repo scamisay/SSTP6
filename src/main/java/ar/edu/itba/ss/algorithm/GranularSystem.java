@@ -44,15 +44,14 @@ public class GranularSystem {
         double t = 0;
         long i = 0;
 
-        for (; room.isSomeoneLeftToEscape() && (t < 300) &&
-                ((particleNumbers - egresos.size())>0); t+=dt, i++ ){
+        for (; i<=dt2*100; t+=dt, i++ ){
             if (i % dt2 == 0 ) {
                 if(printer != null){
                     printer.printState(t, room.getParticles());
                     if((i*1e5)%555 == 0){
-                        System.out.println(particleNumbers - egresos.size() +" t="+t);
+                        //System.out.println(particleNumbers - egresos.size() +" t="+t);
                     }
-                    //System.out.println(t);
+                    System.out.println(i/dt2);
                 }
 
             }

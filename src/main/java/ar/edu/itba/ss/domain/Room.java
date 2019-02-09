@@ -134,7 +134,7 @@ public class Room {
         cim.calculate();
         particles.forEach( p -> p.updatePositionLF(dt));
         particles.forEach( p -> p.predictVelocity(dt));
-        particles.forEach( p -> p.calculateForceLF(kN, gamma, this,A,B, drivenVelocity, TAU, target, dt));
+        particles.forEach( p -> p.calculateForceLF(kN, gamma, this,A,B, drivenVelocity, TAU, p.getTarget(this), dt));
         particles.forEach( p -> p.updateVelocityLF(dt));
     }
 
@@ -151,7 +151,7 @@ public class Room {
                 &&
                 (particle.getLastPosition().getY() >= getBottomPadding());
         if (ret) {
-            particle.position = Vector2D.POSITIVE_INFINITY;
+            //particle.position = Vector2D.POSITIVE_INFINITY;
             //particles.remove(particle);
         }
         return ret;
@@ -188,5 +188,13 @@ public class Room {
 
     public boolean isSomeoneLeftToEscape() {
         return particles.stream().filter( p -> (p.getPosition().getY() + 4*p.getRadius()) >= getBottomPadding()).count() > 0;
+    }
+
+    public boolean isInVerticalStreet(double x) {
+        return x>=0 && x<=width;
+    }
+
+    public boolean isInHorizontalStreet(double y) {
+        return y>=bottomPadding && y<=bottomPadding+height;
     }
 }
